@@ -327,9 +327,9 @@ void SoftbodyObject::UpdateVerlet(float deltaTime)
 {
 	
 	UpdatePoints(deltaTime);
-	ApplyCollision();
-	UpdateSticks(deltaTime);
-	UpdateVertices();
+	//ApplyCollision();
+	//UpdateSticks(deltaTime);
+	//UpdateVertices();
 }
 
 void SoftbodyObject::UpdateSticks(float deltaTime)
@@ -360,7 +360,7 @@ void SoftbodyObject::UpdateSticks(float deltaTime)
 				
 					if (!pointA->locked) pointA->position += delta * 0.5f * diff * tightnessFactor;
 					
-					//if (!pointB->locked) pointB->position -= delta * 0.5f * diff * tightnessFactor;
+					if (!pointB->locked) pointB->position -= delta * 0.5f * diff * tightnessFactor;
 				
 
 					CleanZeros(pointA->position);
@@ -402,6 +402,7 @@ void SoftbodyObject::UpdatePoints(float deltaTime)
 		deltaTime = MAX_DELTATIME;
 	}
 
+	const float dampingFactor = 0.98f;
 	for (Point* point : listOfPoints)
 	{
 		if (!point->locked)
@@ -412,26 +413,16 @@ void SoftbodyObject::UpdatePoints(float deltaTime)
 			glm::vec3 direction = currentPosition - prevPosition;
 
 			
-				point->position += (direction) + (glm::vec3(0, -gravity, 0) * (float)(deltaTime * deltaTime));
+			glm::vec3 velocity = (point->position - point->previousPosition) * dampingFactor +
+				glm::vec3(0, -gravity, 0) * (float)(deltaTime * deltaTime);
+
+
+			point->velocity = velocity;
+			point->position += velocity;
 
 				point->previousPosition = currentPosition;
 
-
-				/*if (CheckSoftBodyAABBCollision(point,updateAABBTest->UpdateAABB()))
-				{
-					std::cout << "CollisionDetected" << std::endl;
-					handleSoftBodyAABBCollision(*point, updateAABBTest->UpdateAABB());
-				}
-				else*/
-				/*{
-					point->position += (point->position - point->previousPosition);
-
-					point->position += downVector * gravity * (deltaTime * deltaTime);
-
-				}
-
-
-				point->previousPosition = currentPosition;*/
+				HandleCollisionPoint(point);
 
 				CleanZeros(point->position);
 				CleanZeros(point->previousPosition);
@@ -456,13 +447,13 @@ void SoftbodyObject::ApplyCollision()
 
 	for (Point* point : listOfPoints)
 	{
-		/*if (CheckSoftBodyAABBCollision(point, updateAABBTest->UpdateAABB()))
-		{
-			handleSoftBodyAABBCollision(*point,updateAABBTest->UpdateAABB());
-			std::cout << "Collision Detected" << std::endl;
-		}*/
+		//if (!point->locked && CheckSoftBodyAABBCollision(point, updateAABBTest->UpdateAABB()))
+		//{
+		//	HandleSoftBodyAABBCollision(*point,updateAABBTest->UpdateAABB());
+		//	//std::cout << "Collision Detected" << std::endl;
+		//}
 		cSphere sphere = updateAABBTest->UpdateSphere();
-		if (CheckSoftBodySphereCollision(point, sphere))
+		if (!point->locked && CheckSoftBodySphereCollision(point, sphere))
 		{
 			HandleSoftBodySphereCollision(point, sphere);
 		}
@@ -680,21 +671,40 @@ void SoftbodyObject::HandleSoftBodySphereCollision(Point*& point, const cSphere&
 {
 	//float distance = glm::distance(point->position, sphere.center);
 
-	//if (distance < sphere.radius)
+	glm::vec3 particleToCentre = point->position - sphere.center;
+
+	// Check if the point is inside the sphere
+	if (glm::length(particleToCentre) < sphere.radius)
 	{
-		glm::vec3 particleToCentreRay = point->position - sphere.center;
-		// Normalize to get the direction
-		particleToCentreRay = glm::normalize(particleToCentreRay);
+		// Calculate the collision normal
+		glm::vec3 collisionNormal = glm::normalize(particleToCentre);
 
+		// Reflect the velocity
+		float dotProduct = glm::dot(point->velocity, collisionNormal);
+		point->velocity -= 2.0f * dotProduct * collisionNormal;
 
-		if (glm::length(particleToCentreRay) != 0)
-		{
-			point->position = (particleToCentreRay * sphere.radius) + sphere.center;
-		}
+		// Move the point outside the sphere to avoid penetration
+		point->position = sphere.center + collisionNormal * sphere.radius;
 	}
 	
 
 	//return;
+}
+
+void SoftbodyObject::HandleCollisionPoint(Point* point)
+{
+	cAABB floorAABB = updateAABBTest->UpdateAABB();
+
+
+	if (point->position.y < floorAABB.minV.y)
+	{
+		point->position.y = floorAABB.minV.y;
+		point->velocity.y *= -restitutionFactor;  // Apply restitution
+
+		// Damping in the collision response
+		point->velocity *= dampingFactor;
+	}
+
 }
 
 void SoftbodyObject::HandleSoftBodyAABBCollision(Point& point,const cAABB& aabb)
@@ -731,9 +741,11 @@ void SoftbodyObject::HandleSoftBodyAABBCollision(Point& point,const cAABB& aabb)
 	point.position.y = glm::clamp(point.position.y, aabb.minV.y, aabb.maxV.y);
 	point.position.z = glm::clamp(point.position.z, aabb.minV.z, aabb.maxV.z);
 
-	//point.position.y = glm::clamp(point.position.y, aabb.minV.y, aabb.maxV.y);
-		// 
-		// point.position = glm::vec
+	float restitutionFactor = 0.8f;
+	glm::vec3 normal = glm::vec3(0.0f, 1.0f, 0.0f); // Assuming the AABB represents a floor
+	glm::vec3 velocity = point.position - point.previousPosition;
+	glm::vec3 reflectedVelocity = velocity - 2.0f * glm::dot(velocity, normal) * normal;
+	point.previousPosition = point.position - restitutionFactor * reflectedVelocity;
 		
 }
 

@@ -17,6 +17,7 @@ struct ApplicationThread // SoftBody Struct Infor
     double desiredUpdateTime = 0.0;  
     bool isThreadActive = false;	
     bool isActive = true;
+    bool* isApplicationPlay = nullptr;
     DWORD sleepTime;	
 
     DWORD ThreadId = 0;

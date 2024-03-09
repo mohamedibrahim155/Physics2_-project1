@@ -29,8 +29,12 @@ DWORD WINAPI UpdateApplicationThread(LPVOID lpParameter)
 
 			
 				//threadPointer->manager->Update(deltaTime);
-				threadPointer->entityManager->Update(deltaTime);
+				//threadPointer->entityManager->Update(deltaTime);
+			if (*threadPointer->isApplicationPlay)
+			{
+
 				threadPointer->physicsEngine->Update(deltaTime);
+			}
 
 
 				

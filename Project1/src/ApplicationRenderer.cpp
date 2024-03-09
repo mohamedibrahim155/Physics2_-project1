@@ -193,7 +193,7 @@ void ApplicationRenderer::InitializeSkybox()
 
 void ApplicationRenderer::Start()
 {
-  //  InitializeApplicationThread(0.01);
+    InitializeApplicationThread(0.01);
 
     sceneViewcamera->postprocessing->InitializePostProcessing();
 
@@ -241,40 +241,29 @@ void ApplicationRenderer::Start()
     SoftbodyObject* softBodyTest1 = new SoftbodyObject();
     softBodyTest1->name = "SoftbodySphere1";
    // softBodyTest1->LoadModel("Models/Plane/Plane.ply");
-    softBodyTest1->LoadModel("Models/Chain/Chain.fbx");
+    softBodyTest1->LoadModel("Models/DefaultSphere/DefaultSphere.fbx");
     //softBodyTest1->LoadModel("Models/DefaultCube/DefaultCube.fbx");
     softBodyTest1->transform.SetPosition(glm::vec3(0, 1, 0));
     //softBodyTest1->transform.SetPosition(glm::vec3(0, 1, 0));
     //softBodyTest1->transform.SetScale(glm::vec3(5));
     softBodyTest1->transform.SetScale(glm::vec3(0.25f));
     GraphicsRender::GetInstance().AddModelAndShader(softBodyTest1, defaultShader);
-    softBodyTest1->updateAABBTest = ballPhysics;
-    softBodyTest1->type = BodyType::SPRING;
+    softBodyTest1->updateAABBTest = floor;
+    softBodyTest1->type = BodyType::CLOTH;
     softBodyTest1->Initialize();
     
-    softBodyTest1->AddLockSphere(glm::vec3(0.00192526f, 0.991442f, -0.00474217f), 0.08f);
+    //softBodyTest1->AddLockSphere(glm::vec3(0.00192526f, 0.991442f, -0.00474217f), 0.08f);
 
 
-    SoftbodyObject* softBodyTest2 = new SoftbodyObject();
-    softBodyTest2->name = "SoftbodySphere1";
-    // softBodyTest2->LoadModel("Models/Plane/Plane.ply");
-    softBodyTest2->LoadModel("Models/Chain/Chain.fbx");
-    //softBodyTest2->LoadModel("Models/DefaultCube/DefaultCube.fbx");
-    softBodyTest2->transform.SetPosition(glm::vec3(0, 4, 0));
-    //softBodyTest2->transform.SetPosition(glm::vec3(0, 1, 0));
-    //softBodyTest2->transform.SetScale(glm::vec3(5));
-    softBodyTest2->transform.SetScale(glm::vec3(0.25f));
-    GraphicsRender::GetInstance().AddModelAndShader(softBodyTest2, defaultShader);
-    softBodyTest2->updateAABBTest = ballPhysics;
-    softBodyTest2->type = BodyType::SPRING;
-    softBodyTest2->Initialize();
+    
 
-    softBodyTest2->AddLockSphere(glm::vec3(0.00192526f, 0.991442f+4, -0.00474217f), 0.08f);
+    
 
   //  0.00192526, 0.991442, -0.00474217
-   /* StartThreads* summatest = new StartThreads();
+    StartThreads* summatest = new StartThreads();
 
-    applicationThread->isThreadActive = true;*/
+    applicationThread->isThreadActive = true;
+    applicationThread->isApplicationPlay = &isPlayMode;
 }
 
 void ApplicationRenderer::PreRender()
@@ -354,9 +343,9 @@ void ApplicationRenderer::Render()
 
         EngineGameLoop();
 
-      /*  EnterCriticalSection(&applicationThread->cs);
+        EnterCriticalSection(&applicationThread->cs);
         applicationThread->physicsEngine->UpdateSoftBodiesVertices();
-        LeaveCriticalSection(&applicationThread->cs);*/
+        LeaveCriticalSection(&applicationThread->cs);
 
         EngineGraphicsRender();
 
@@ -365,12 +354,12 @@ void ApplicationRenderer::Render()
         glfwPollEvents();
     }
 
-  /*  applicationThread->isThreadActive = false;
+    applicationThread->isThreadActive = false;
     applicationThread->isActive = false;
     WaitForSingleObject(applicationThread->threadHandle, INFINITE);
     CloseHandle(applicationThread->threadHandle);
     DeleteCriticalSection(&applicationThread->cs);
-    */
+    
 
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -536,7 +525,7 @@ void ApplicationRenderer::PostRender()
 
     if (isPlayMode)
     {
-        PhysicsEngine::GetInstance().Update(Time::GetInstance().deltaTime);
+       // PhysicsEngine::GetInstance().Update(Time::GetInstance().deltaTime);
     }
 }
 

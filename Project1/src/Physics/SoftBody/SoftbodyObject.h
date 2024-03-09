@@ -20,7 +20,7 @@ public:
 
 	bool isSoftBodyActive = true;
 
-	float gravity = 0.1f /*-9.81f*/;
+	float gravity = 5.f /*-9.81f*/;
 
 	BodyType type = BodyType::CLOTH;
 
@@ -75,12 +75,15 @@ private:
 	bool CheckSoftBodyAABBCollision(Point* point, const cAABB& aabb);
 	bool CheckSoftBodySphereCollision(Point* point, const cSphere& sphere);
 	void HandleSoftBodySphereCollision(Point*& point, const cSphere& sphere);
+	void HandleCollisionPoint(Point* point);
+
 	//bool CheckSoftBodyAABBCollision(const cAABB& aabb);
 	
 
 	void HandleSoftBodyAABBCollision(Point& particle, const cAABB& aabb);
 
 	bool IsPointLocked(Point* point, glm::vec3 centre, float radius);
-
+	const float dampingFactor = 0.98f;
+	const float restitutionFactor = 0;
 };
 
