@@ -3,7 +3,7 @@
 #include "../PhysicsCollisionTypes.h"
 #include"../PhysicsObject.h"
 #include "Stick.h"
-
+#include <unordered_map>
 
 
 enum class BodyType
@@ -48,7 +48,7 @@ public:
 	void UpdateSticks(float deltaTime);
 	void UpdatePoints(float deltaTime);
 
-	void CollisionTest();
+	void ApplyCollision();
 	void UpdateVertices();
 	void UpdateNormals();
 
@@ -67,6 +67,10 @@ private:
 
 	glm::vec3 downVector = glm::vec3(0, -1, 0);
 	glm::vec3 lockSphereCenter;
+
+	std::unordered_map<float, glm::vec3> lockSphereDebug;
+
+
 	
 	bool CheckSoftBodyAABBCollision(Point* point, const cAABB& aabb);
 	bool CheckSoftBodySphereCollision(Point* point, const cSphere& sphere);

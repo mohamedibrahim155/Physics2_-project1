@@ -79,7 +79,7 @@ void SoftbodyObject::CalculateSpring()
 	listOfPoints.clear();
 	listOfSticks.clear();
 
-	glm::mat4 modelMat  = transform.GetModelMatrix();
+	glm::mat4 modelTransfomedMatrix  = transform.GetModelMatrix();
 
 	for (std::shared_ptr<Mesh> mesh : meshes)
 	{
@@ -90,15 +90,15 @@ void SoftbodyObject::CalculateSpring()
 		Point* point = new Point();
 
 
-		for (size_t index = 0; index < mesh->vertices.size(); index++)
+		for (Vertex& vertex  : mesh->vertices)
 		{
 
-			totalPositions += mesh->vertices[index].Position;
+			totalPositions += vertex.Position;
 
 			VertexData* temp = new VertexData();
 
 
-			temp->vertex = &mesh->vertices[index];
+			temp->vertex = &vertex;
 
 			point->vertex.push_back(temp);
 		}
@@ -106,29 +106,27 @@ void SoftbodyObject::CalculateSpring()
 		point->centre = totalPositions / (float)point->vertex.size();
 
 
-		for (size_t i = 0; i < point->vertex.size(); i++)
+		for (VertexData*& vertexData :  point->vertex)
 		{
-			point->vertex[i]->offset = point->vertex[i]->vertex->Position - point->centre;
+			vertexData->offset = vertexData->vertex->Position - point->centre;
 		}
 
 
 	
 
-		for (size_t index = 0; index < mesh->vertices.size(); index++)
+		for (Vertex& vertex : mesh->vertices)
 		{
 
-			glm::vec3 transformedPosition = modelMat * glm::vec4(mesh->vertices[index].Position, 1);
+			glm::vec3 transformedPosition = modelTransfomedMatrix * glm::vec4(vertex.Position, 1);
 
-			mesh->vertices[index].Position = transformedPosition;
-
-
+			vertex.Position = transformedPosition;
 		}
 
 
 	
 		//point->centre = totalPositions / (float)point->vertex.size();
 
-		point->position = modelMat * glm::vec4(point->centre, 1);
+		point->position = modelTransfomedMatrix * glm::vec4(point->centre, 1);
 
 		point->previousPosition = point->position;
 
@@ -315,7 +313,10 @@ void SoftbodyObject::Render()
 		GraphicsRender::GetInstance().DrawLine(stick->pointA->position, stick->pointB->position, glm::vec4(1, 1, 0, 1));
 	}
 	
-	GraphicsRender::GetInstance().DrawSphere(lockSphereCenter, lockRadius, glm::vec4(1, 0, 1, 1), true);
+	for (std::unordered_map<float, glm::vec3 >::iterator it = lockSphereDebug.begin(); it != lockSphereDebug.end(); ++it)
+	{
+		GraphicsRender::GetInstance().DrawSphere(it->second, it->first, glm::vec4(1, 0, 1, 1), true);
+	}
 }
 
 void SoftbodyObject::OnDestroy()
@@ -326,9 +327,9 @@ void SoftbodyObject::UpdateVerlet(float deltaTime)
 {
 	
 	UpdatePoints(deltaTime);
-	CollisionTest();
+	ApplyCollision();
 	UpdateSticks(deltaTime);
-	//UpdateVertices();
+	UpdateVertices();
 }
 
 void SoftbodyObject::UpdateSticks(float deltaTime)
@@ -359,7 +360,7 @@ void SoftbodyObject::UpdateSticks(float deltaTime)
 				
 					if (!pointA->locked) pointA->position += delta * 0.5f * diff * tightnessFactor;
 					
-					if (!pointB->locked) pointB->position -= delta * 0.5f * diff * tightnessFactor;
+					//if (!pointB->locked) pointB->position -= delta * 0.5f * diff * tightnessFactor;
 				
 
 					CleanZeros(pointA->position);
@@ -443,7 +444,7 @@ void SoftbodyObject::UpdatePoints(float deltaTime)
 
 
 
-void SoftbodyObject::CollisionTest()
+void SoftbodyObject::ApplyCollision()
 {
 	//for (Point* point : listOfPoints)
 	//{
@@ -522,6 +523,8 @@ void SoftbodyObject::AddLockSphere(glm::vec3 centre, float radius)
 	lockSphereCenter = centre;
 	lockRadius = radius;
 
+	lockSphereDebug[radius] = lockSphereCenter;
+
 	for (Point* point : listOfPoints)
 	{
 		point->locked = IsPointLocked(point, centre, radius);
@@ -539,10 +542,7 @@ void SoftbodyObject::UpdateVertices()
 		for (Point* point : listOfPoints)
 		{
 			glm::vec4 vertexMatrix = glm::vec4(point->position, 1.0f);
-
-		
 			vertexMatrix = modelInversematrix * vertexMatrix;
-
 			point->vertex[0]->vertex->Position = glm::vec3(vertexMatrix.x, vertexMatrix.y, vertexMatrix.z);
 		}
 		break;
@@ -550,21 +550,11 @@ void SoftbodyObject::UpdateVertices()
 
 		for (Point* point : listOfPoints)
 		{
-			for (size_t i = 0; i < point->vertex.size(); i++)
+			for (int i = 0; i < point->vertex.size(); i++)
 			{
-
-
 				glm::vec3 transformPosition =   modelInversematrix * glm::vec4((point->position), 1);
-
-
 				transformPosition += point->vertex[i]->offset;
-
-
-			//vertexMatrix = vertexMatrix * transform.GetModelMatrix();
-
 				point->vertex[i]->vertex->Position = glm::vec3(transformPosition.x, transformPosition.y, transformPosition.z);
-
-
 			}
 		}
 		break;

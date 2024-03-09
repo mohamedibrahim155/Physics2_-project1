@@ -193,7 +193,7 @@ void ApplicationRenderer::InitializeSkybox()
 
 void ApplicationRenderer::Start()
 {
-    InitializeApplicationThread(0.01);
+  //  InitializeApplicationThread(0.01);
 
     sceneViewcamera->postprocessing->InitializePostProcessing();
 
@@ -260,7 +260,7 @@ void ApplicationRenderer::Start()
     // softBodyTest2->LoadModel("Models/Plane/Plane.ply");
     softBodyTest2->LoadModel("Models/Chain/Chain.fbx");
     //softBodyTest2->LoadModel("Models/DefaultCube/DefaultCube.fbx");
-    softBodyTest1->transform.SetPosition(glm::vec3(0, 4, 0));
+    softBodyTest2->transform.SetPosition(glm::vec3(0, 4, 0));
     //softBodyTest2->transform.SetPosition(glm::vec3(0, 1, 0));
     //softBodyTest2->transform.SetScale(glm::vec3(5));
     softBodyTest2->transform.SetScale(glm::vec3(0.25f));
@@ -272,9 +272,9 @@ void ApplicationRenderer::Start()
     softBodyTest2->AddLockSphere(glm::vec3(0.00192526f, 0.991442f+4, -0.00474217f), 0.08f);
 
   //  0.00192526, 0.991442, -0.00474217
-    StartThreads* summatest = new StartThreads();
+   /* StartThreads* summatest = new StartThreads();
 
-    applicationThread->isThreadActive = true;
+    applicationThread->isThreadActive = true;*/
 }
 
 void ApplicationRenderer::PreRender()
@@ -354,9 +354,9 @@ void ApplicationRenderer::Render()
 
         EngineGameLoop();
 
-        EnterCriticalSection(&applicationThread->cs);
+      /*  EnterCriticalSection(&applicationThread->cs);
         applicationThread->physicsEngine->UpdateSoftBodiesVertices();
-        LeaveCriticalSection(&applicationThread->cs);
+        LeaveCriticalSection(&applicationThread->cs);*/
 
         EngineGraphicsRender();
 
@@ -365,12 +365,12 @@ void ApplicationRenderer::Render()
         glfwPollEvents();
     }
 
-    applicationThread->isThreadActive = false;
+  /*  applicationThread->isThreadActive = false;
     applicationThread->isActive = false;
     WaitForSingleObject(applicationThread->threadHandle, INFINITE);
     CloseHandle(applicationThread->threadHandle);
     DeleteCriticalSection(&applicationThread->cs);
-    
+    */
 
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -536,7 +536,7 @@ void ApplicationRenderer::PostRender()
 
     if (isPlayMode)
     {
-      //  PhysicsEngine::GetInstance().Update(Time::GetInstance().deltaTime);
+        PhysicsEngine::GetInstance().Update(Time::GetInstance().deltaTime);
     }
 }
 
