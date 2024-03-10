@@ -9,6 +9,7 @@ struct VertexData
 	Vertex* vertex = nullptr;
 	glm::vec3 offset;
 };
+struct Stick;
 
 struct Point
 {
@@ -23,6 +24,8 @@ struct Point
 	glm::vec3 previousPosition = glm::vec3(0);
 	glm::vec3 velocity = glm::vec3(0);
 	glm::vec3 centre = glm::vec3(0);
+	std::vector<Stick*> connectedSticks;
+	float radius = 0.005f;
 	 std::vector<VertexData*> vertex;
 	bool locked = false;
 

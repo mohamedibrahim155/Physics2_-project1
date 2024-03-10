@@ -200,9 +200,6 @@
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\SkyboxMaterial.cpp" />
     <ClCompile Include="src\Textures.cpp" />
-    <ClCompile Include="src\Threading\ExampleClass.cpp" />
-    <ClCompile Include="src\Threading\ExampleClassTwo.cpp" />
-    <ClCompile Include="src\Threading\StartThreads.cpp" />
     <ClCompile Include="src\Threading\ThreadManager.cpp" />
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />
@@ -280,11 +277,8 @@
     <ClInclude Include="src\SkyboxMaterial.h" />
     <ClInclude Include="src\Textures.h" />
     <ClInclude Include="src\Threading\BaseMyThread.h" />
-    <ClInclude Include="src\Threading\ExampleClass.h" />
-    <ClInclude Include="src\Threading\ExampleClassTwo.h" />
     <ClInclude Include="src\Threading\MyThread.h" />
     <ClInclude Include="src\Threading\ApplicationThread.h" />
-    <ClInclude Include="src\Threading\StartThreads.h" />
     <ClInclude Include="src\Threading\ThreadManager.h" />
     <ClInclude Include="src\Threading\ThreadStruct.h" />
     <ClInclude Include="src\Transform.h" />

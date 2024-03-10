@@ -1,6 +1,5 @@
 #include"ApplicationRenderer.h"
 #include"Threading/ApplicationThread.h"
-#include "Threading/StartThreads.h"
 
 ApplicationRenderer::ApplicationRenderer()
 {
@@ -238,29 +237,40 @@ void ApplicationRenderer::Start()
     //Model* chain
 
 
-    SoftbodyObject* softBodyTest1 = new SoftbodyObject();
-    softBodyTest1->name = "SoftbodySphere1";
-   // softBodyTest1->LoadModel("Models/Plane/Plane.ply");
-    softBodyTest1->LoadModel("Models/DefaultSphere/DefaultSphere.fbx");
-    //softBodyTest1->LoadModel("Models/DefaultCube/DefaultCube.fbx");
-    softBodyTest1->transform.SetPosition(glm::vec3(0, 1, 0));
+    //SoftbodyObject* softBodyTest1 = new SoftbodyObject();
+    //softBodyTest1->name = "SoftbodySphere1";
+    //softBodyTest1->LoadModel("Models/DefaultSphere/DefaultSphere.fbx");
     //softBodyTest1->transform.SetPosition(glm::vec3(0, 1, 0));
-    //softBodyTest1->transform.SetScale(glm::vec3(5));
-    softBodyTest1->transform.SetScale(glm::vec3(0.25f));
-    GraphicsRender::GetInstance().AddModelAndShader(softBodyTest1, defaultShader);
-    softBodyTest1->updateAABBTest = floor;
-    softBodyTest1->type = BodyType::CLOTH;
-    softBodyTest1->Initialize();
-    
-    //softBodyTest1->AddLockSphere(glm::vec3(0.00192526f, 0.991442f, -0.00474217f), 0.08f);
+    //softBodyTest1->transform.SetScale(glm::vec3(0.25f));
+    //GraphicsRender::GetInstance().AddModelAndShader(softBodyTest1, defaultShader);
 
+    //softBodyTest1->AddPhysicsObject(ballPhysics);
 
-    
+    //softBodyTest1->type = BodyType::SPRING;
+    //softBodyTest1->Initialize();
+    //
 
+    SoftbodyObject* softBodyTest2 = new SoftbodyObject();
+    softBodyTest2->name = "SoftbodySphere1";
+    softBodyTest2->LoadModel("Models/DefaultCube/DefaultCube.fbx");
+    softBodyTest2->transform.SetPosition(glm::vec3(0, 1, 0));
+    softBodyTest2->transform.SetScale(glm::vec3(0.25f));
+    GraphicsRender::GetInstance().AddModelAndShader(softBodyTest2, defaultShader);
+
+    softBodyTest2->AddPhysicsObject(ballPhysics);
+
+    softBodyTest2->type = BodyType::CLOTH;
+    softBodyTest2->Initialize();
     
+    softBodyTest2->AddLockSphere(glm::vec3(0.2f, 1.2f, 0.2f), 0.15f);
+    softBodyTest2->AddSticksForAllPoints();
+    //softBodyTest2->AddLockSphere(glm::vec3(-0.2f, 0.8f, -0.2f), 0.15f);
+   // softBodyTest2->AddSticksInbetween(0, 15);
+   // softBodyTest2->isVisible = false;
+
 
   //  0.00192526, 0.991442, -0.00474217
-    StartThreads* summatest = new StartThreads();
+    
 
     applicationThread->isThreadActive = true;
     applicationThread->isApplicationPlay = &isPlayMode;
@@ -386,19 +396,8 @@ void ApplicationRenderer::EngineGraphicsRender()
 
 
 
-    /*sceneViewframeBuffer->Bind();
-
-    //GraphicsRender::GetInstance().Clear();
-    //PreRender();
-    //GraphicsRender::GetInstance().Draw();
-
-    //sceneViewframeBuffer->Unbind();*/
     RenderForCamera(sceneViewcamera, sceneViewframeBuffer);
 
-
-    /*  RenderForCamera(gameScenecamera, gameframeBuffer);
-
-      RenderForCamera(renderTextureCamera, renderTextureCamera->renderTexture->framebuffer);*/
 
 
     for (Camera* camera : CameraManager::GetInstance().GetCameras())
@@ -416,12 +415,6 @@ void ApplicationRenderer::EngineGraphicsRender()
 
     }
 
-    //gameframeBuffer->Bind();
-    //GraphicsRender::GetInstance().Clear();
-    //PreRender();
-    //GraphicsRender::GetInstance().Draw();
-
-    //gameframeBuffer->Unbind();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -441,11 +434,6 @@ void ApplicationRenderer::EngineGameLoop()
 void ApplicationRenderer::RenderForCamera(Camera* camera, FrameBuffer* framebuffer)
 {
 
-    /*  sceneViewframeBuffer->Bind();
-
-      GraphicsRender::GetInstance().Clear();
-      PreRender();
-      GraphicsRender::GetInstance().Draw();*/
 
 
     framebuffer->Bind();

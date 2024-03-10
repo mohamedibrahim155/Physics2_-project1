@@ -33,8 +33,11 @@ public:
 	void CalculateCloth();
 	void CalculateSpring();
 	void SetupPoints(std::vector<Vertex>& vertices);
+	void AddSticksInbetween(unsigned int index1, unsigned int index2);
 	void SetupSticks(std::shared_ptr<Mesh> mesh, unsigned int currentMeshIndex);
 
+	void AddSticksForAllPoints();
+	bool CheckStickExists(Point* point, Point* otherPoint);
 
 	void DrawProperties()override;
 	void SceneDraw()override;
@@ -54,6 +57,7 @@ public:
 
 	void CleanZeros(glm::vec3& value);
 	void AddLockSphere(glm::vec3 centre, float radius);
+	void AddPhysicsObject(PhysicsObject* object);
 
 	PhysicsObject* updateAABBTest = nullptr;
 private:
@@ -69,13 +73,12 @@ private:
 	glm::vec3 lockSphereCenter;
 
 	std::unordered_map<float, glm::vec3> lockSphereDebug;
-
+	std::vector<PhysicsObject*> listOfPhysicsObject;
 
 	
 	bool CheckSoftBodyAABBCollision(Point* point, const cAABB& aabb);
 	bool CheckSoftBodySphereCollision(Point* point, const cSphere& sphere);
 	void HandleSoftBodySphereCollision(Point*& point, const cSphere& sphere);
-	void HandleCollisionPoint(Point* point);
 
 	//bool CheckSoftBodyAABBCollision(const cAABB& aabb);
 	
@@ -83,7 +86,5 @@ private:
 	void HandleSoftBodyAABBCollision(Point& particle, const cAABB& aabb);
 
 	bool IsPointLocked(Point* point, glm::vec3 centre, float radius);
-	const float dampingFactor = 0.98f;
-	const float restitutionFactor = 0;
 };
 

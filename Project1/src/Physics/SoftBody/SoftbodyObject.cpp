@@ -167,13 +167,28 @@ void SoftbodyObject::SetupPoints(std::vector<Vertex>& vertices)
 		vertexData->vertex = &vertex;
 
 		Point* temp = new Point(vertex.Position, vertex.Position, { vertexData });
+
+
 		listOfPoints.push_back(temp);
 	}
 
 }
 
+
+
+void SoftbodyObject::AddSticksInbetween(unsigned int index1, unsigned int index2)
+{
+	Point* point1 = listOfPoints[index1];
+	Point* point2 = listOfPoints[index2];
+
+	Stick* newStick = new Stick(point1, point2);
+
+	listOfSticks.push_back(newStick);
+}
+
 void SoftbodyObject::SetupSticks(std::shared_ptr<Mesh> mesh, unsigned int currentMeshIndex)
 {
+	//for (size_t i = 0; i < mesh->indices.size(); i += 3)
 	for (size_t i = 0; i < mesh->indices.size(); i += 3)
 	{
 
@@ -188,10 +203,38 @@ void SoftbodyObject::SetupSticks(std::shared_ptr<Mesh> mesh, unsigned int curren
 		Stick* edge2 = new Stick(point2, point3);
 		listOfSticks.push_back(edge2);
 
-		Stick* edge3 = new Stick(point3, point1);
-		listOfSticks.push_back(edge3);
+		/*Stick* edge3 = new Stick(point3, point1);
+		listOfSticks.push_back(edge3);*/
 
 	}
+}
+
+void SoftbodyObject::AddSticksForAllPoints()
+{
+	for (Point* point : listOfPoints)
+	{
+		for (Point* otherPoint : listOfPoints)
+		{
+			if (point == otherPoint) continue;
+
+			if (!CheckStickExists(point,otherPoint))
+			{
+				listOfSticks.push_back(new Stick(point, otherPoint));
+			}
+		}
+	}
+}
+
+bool SoftbodyObject::CheckStickExists(Point* point, Point* otherPoint)
+{
+	for (Stick* stick : listOfSticks)
+	{
+		if (stick->pointA == point && stick->pointB == otherPoint)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -257,8 +300,10 @@ void SoftbodyObject::DrawProperties()
 		ImGui::SetNextItemWidth(80);
 		ImGui::Checkbox(("##locked" + std::to_string(i)).c_str(), &point->locked);
 
-
-
+		std::string index = "Index " + std::to_string(i);
+		ImGui::SetNextItemWidth(80);
+		ImGui::Text(index.c_str());
+		
 
 		ImGui::SetNextItemWidth(80);
 		ImGui::Text("points");
@@ -325,10 +370,9 @@ void SoftbodyObject::OnDestroy()
 
 void SoftbodyObject::UpdateVerlet(float deltaTime)
 {
-	
+	ApplyCollision();
 	UpdatePoints(deltaTime);
-	//ApplyCollision();
-	//UpdateSticks(deltaTime);
+	UpdateSticks(deltaTime);
 	//UpdateVertices();
 }
 
@@ -420,9 +464,7 @@ void SoftbodyObject::UpdatePoints(float deltaTime)
 			point->velocity = velocity;
 			point->position += velocity;
 
-				point->previousPosition = currentPosition;
-
-				HandleCollisionPoint(point);
+				point->previousPosition = currentPosition;	
 
 				CleanZeros(point->position);
 				CleanZeros(point->previousPosition);
@@ -437,27 +479,34 @@ void SoftbodyObject::UpdatePoints(float deltaTime)
 
 void SoftbodyObject::ApplyCollision()
 {
-	//for (Point* point : listOfPoints)
-	//{
-	//	if (point->position.y < -5.0f)
-	//	{
-	//		point->position.y = -5.0f;
-	//	}
-	//}
 
-	for (Point* point : listOfPoints)
+
+
+	for (PhysicsObject* physicsObject : listOfPhysicsObject)
 	{
-		//if (!point->locked && CheckSoftBodyAABBCollision(point, updateAABBTest->UpdateAABB()))
-		//{
-		//	HandleSoftBodyAABBCollision(*point,updateAABBTest->UpdateAABB());
-		//	//std::cout << "Collision Detected" << std::endl;
-		//}
-		cSphere sphere = updateAABBTest->UpdateSphere();
-		if (!point->locked && CheckSoftBodySphereCollision(point, sphere))
+
+		for (Point* point : listOfPoints)
 		{
-			HandleSoftBodySphereCollision(point, sphere);
+
+			switch (physicsObject->physicsType)
+			{
+			case SPHERE:
+
+				//CheckSphereVSSphereCollision
+			//	if (!point->locked && CheckSoftBodySphereCollision(point, physicsObject->UpdateSphere()))
+				{
+					HandleSoftBodySphereCollision(point, physicsObject->UpdateSphere());
+				}
+				break;
+			default:
+				break;
+			}
+			
+
 		}
+		
 	}
+	
 
 	
 
@@ -519,7 +568,16 @@ void SoftbodyObject::AddLockSphere(glm::vec3 centre, float radius)
 	for (Point* point : listOfPoints)
 	{
 		point->locked = IsPointLocked(point, centre, radius);
+		
 	}
+
+}
+
+
+
+void SoftbodyObject::AddPhysicsObject(PhysicsObject* object)
+{
+	listOfPhysicsObject.push_back(object);
 }
 
 void SoftbodyObject::UpdateVertices()
@@ -669,73 +727,26 @@ bool SoftbodyObject::CheckSoftBodySphereCollision(Point* point, const cSphere& s
 
 void SoftbodyObject::HandleSoftBodySphereCollision(Point*& point, const cSphere& sphere)
 {
-	//float distance = glm::distance(point->position, sphere.center);
+	
 
 	glm::vec3 particleToCentre = point->position - sphere.center;
 
-	// Check if the point is inside the sphere
 	if (glm::length(particleToCentre) < sphere.radius)
 	{
-		// Calculate the collision normal
+
 		glm::vec3 collisionNormal = glm::normalize(particleToCentre);
 
-		// Reflect the velocity
 		float dotProduct = glm::dot(point->velocity, collisionNormal);
 		point->velocity -= 2.0f * dotProduct * collisionNormal;
-
-		// Move the point outside the sphere to avoid penetration
 		point->position = sphere.center + collisionNormal * sphere.radius;
 	}
 	
-
-	//return;
 }
 
-void SoftbodyObject::HandleCollisionPoint(Point* point)
-{
-	cAABB floorAABB = updateAABBTest->UpdateAABB();
 
-
-	if (point->position.y < floorAABB.minV.y)
-	{
-		point->position.y = floorAABB.minV.y;
-		point->velocity.y *= -restitutionFactor;  // Apply restitution
-
-		// Damping in the collision response
-		point->velocity *= dampingFactor;
-	}
-
-}
 
 void SoftbodyObject::HandleSoftBodyAABBCollision(Point& point,const cAABB& aabb)
 {
-	//
-		/*if (point.position.x < aabb.minV.x)
-		{
-			point.position.x = aabb.minV.x;
-		}
-		else if (point.position.x > aabb.maxV.x) 
-		{
-			point.position.x = aabb.maxV.x;
-		}
-
-		if (point.position.y < aabb.minV.y) 
-		{
-			point.position.y = aabb.minV.y;
-		}
-		else if (point.position.y > aabb.maxV.y) 
-		{
-			point.position.y = aabb.maxV.y;
-		}
-
-		if (point.position.z < aabb.minV.z) 
-		{
-			point.position.z = aabb.minV.z;
-		}
-		else if (point.position.z > aabb.maxV.z) 
-		{
-			point.position.z = aabb.maxV.z;
-		}*/
 
 	point.position.x = glm::clamp(point.position.x, aabb.minV.x, aabb.maxV.x);
 	point.position.y = glm::clamp(point.position.y, aabb.minV.y, aabb.maxV.y);

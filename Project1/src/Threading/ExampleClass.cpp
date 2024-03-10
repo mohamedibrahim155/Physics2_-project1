@@ -18,12 +18,12 @@ ExampleClass::~ExampleClass()
 
 void ExampleClass::ThreadUpdate(float deltaTime)
 {
-	std::cout << "Inside Example Class Update" << std::endl;
+	//std::cout << "Inside Example Class Update" << std::endl;
 }
 
 void ExampleClass::Update(float deltaTime)
 {
-	std::cout << "inside entity update" << std::endl;
+	//std::cout << "inside entity update" << std::endl;
 	transform.position.x += 0.1f * deltaTime;
 	ThreadUpdate(deltaTime);
 }
