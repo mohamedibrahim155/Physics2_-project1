@@ -350,7 +350,7 @@ void SoftbodyObject::Render()
 
 	for (Point* point : listOfPoints)
 	{
-		GraphicsRender::GetInstance().DrawSphere(point->position, renderRadius, glm::vec4(0, 1, 1, 1), true);
+		GraphicsRender::GetInstance().DrawSphere(point->position, point->radius, glm::vec4(0, 1, 1, 1), true);
 	}
 
 	for (Stick* stick : listOfSticks)
@@ -480,29 +480,129 @@ void SoftbodyObject::UpdatePoints(float deltaTime)
 
 void SoftbodyObject::ApplyCollision()
 {
+	for (Point* point : listOfPoints)
+	{
+		if (point->position.y < groundLevel)
+		{
+			point->position.y = groundLevel;
+		}
+	}
 
 
 
 	for (PhysicsObject* physicsObject : listOfPhysicsObject)
 	{
+		std::vector<glm::vec3> collisionPoints, collisionNormals;
+
+		int collisionNum = 0;
 
 		for (Point* point : listOfPoints)
 		{
 
+			collisionPoints.clear();
+			collisionNormals.clear();
+
+			bool isCollided = false;
+			cSphere pointSphere = cSphere(point->position, point->radius);
+			cSphere physicsSphere = physicsObject->UpdateSphere();
+			glm::vec3 currentPosition = point->position;
+
+			if (isClothOverSphere)
+			{
+				if (CheckSoftBodySphereCollision(point, physicsSphere)) 
+				{
+					HandleSoftBodySphereCollision(point, physicsSphere);
+
+					continue;
+				}
+			}
+
 			switch (physicsObject->physicsType)
 			{
+
 			case SPHERE:
 
-				//CheckSphereVSSphereCollision
-			//	if (!point->locked && CheckSoftBodySphereCollision(point, physicsObject->UpdateSphere()))
+				if (CheckSphereVSSphereCollision(&pointSphere, &physicsSphere, collisionPoints, collisionNormals))
 				{
-					HandleSoftBodySphereCollision(point, physicsObject->UpdateSphere());
+					isCollided = true;
+					collisionNum++;
+
+					//HandleSoftBodySphereCollision(point, physicsObject->UpdateSphere());
 				}
+			////	if (!point->locked && CheckSoftBodySphereCollision(point, physicsObject->UpdateSphere()))
+			//	{
+			//		HandleSoftBodySphereCollision(point, physicsObject->UpdateSphere());
+			//	}
+				break;
+
+			case AABB:
+
+				if (CheckSphereVSAABBCollision(&pointSphere, physicsObject->UpdateAABB(), true,collisionPoints, collisionNormals))
+				{
+					isCollided = true;
+					collisionNum++;
+
+					//HandleSoftBodyAABBCollision(*point, physicsObject->UpdateAABB());
+				}
+				////	if (!point->locked && CheckSoftBodySphereCollision(point, physicsObject->UpdateSphere()))
+				//	{
+				//		HandleSoftBodySphereCollision(point, physicsObject->UpdateSphere());
+				//	}
 				break;
 			default:
 				break;
 			}
+
+			if (!isCollided)
+			{
+				continue;
+			}
 			
+			if (collisionNormals.size()>0 && collisionNum<2)
+			{
+				glm::vec3 normal = glm::vec3(0.0f);
+				for (size_t k = 0; k < collisionNormals.size(); k++)
+				{
+					normal += glm::normalize(collisionNormals[k]);
+				}
+
+				normal = normal / static_cast<float>(collisionNormals.size());
+
+				glm::vec3 incident = point->velocity;
+				float dotProduct = glm::dot(incident, normal);
+
+				if (dotProduct < 0) 
+				{
+					normal = -normal;
+					dotProduct = -dotProduct;
+				}
+				glm::vec3 reflected = glm::reflect(incident, normal);
+
+				// Check if the length of the normal vector is not close to zero to prevent NaN
+				if (glm::length(normal) > 0.0001f) 
+				{
+					point->velocity = reflected * bounceFactor;
+
+					
+
+				}
+				else 
+				{
+					// Handle the case where the normal vector is close to zero
+					point->velocity = glm::vec3(0.0f);
+
+				//	point->position = point->velocity;
+
+
+				}
+				point->position += point->velocity;
+
+				//point->position = collisionPoints[0];
+
+				point->previousPosition = currentPosition;
+
+				
+			}
 
 		}
 		
@@ -589,6 +689,19 @@ void SoftbodyObject::AddLockIndexSphere(unsigned int Index, float radius)
 void SoftbodyObject::AddPhysicsObject(PhysicsObject* object)
 {
 	listOfPhysicsObject.push_back(object);
+}
+
+void SoftbodyObject::SetPointsSphereRadius(float radius)
+{
+	for (Point* point : listOfPoints)
+	{
+		point->radius = radius;
+	}
+}
+
+void SoftbodyObject::SetPointIndexSphereRadius(int Index, float radius)
+{
+	listOfPoints[Index]->radius = radius;
 }
 
 Point*  SoftbodyObject::MovePoint(unsigned int Index)

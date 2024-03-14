@@ -25,7 +25,7 @@ struct Point
 	glm::vec3 velocity = glm::vec3(0);
 	glm::vec3 centre = glm::vec3(0);
 	std::vector<Stick*> connectedSticks;
-	float radius = 0.005f;
+	float radius = 0.05f;
 	 std::vector<VertexData*> vertex;
 	bool locked = false;
 

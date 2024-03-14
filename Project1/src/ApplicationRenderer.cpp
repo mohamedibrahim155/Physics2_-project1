@@ -218,50 +218,80 @@ void ApplicationRenderer::Start()
      ballPhysics = new PhysicsObject();
     ballPhysics->name = "BallPhysics";
     ballPhysics->LoadModel(*(DebugModels::GetInstance().defaultSphere));
-    ballPhysics->transform.SetPosition(glm::vec3(0, -1, 0));
+    ballPhysics->transform.SetPosition(glm::vec3(0, -1, 0.5f));
     ballPhysics->transform.SetScale(glm::vec3(0.25f));
     GraphicsRender::GetInstance().AddModelAndShader(ballPhysics, defaultShader);
 
-    ballPhysics->Initialize(SPHERE, true, DYNAMIC);
+    PhysicsObject* ballPhysics2 = new PhysicsObject();
+
+        ballPhysics2->Initialize(SPHERE, true, STATIC);
+
+    ballPhysics2 = new PhysicsObject();
+    ballPhysics2->name = "BallPhysics2";
+    ballPhysics2->LoadModel(*(DebugModels::GetInstance().defaultSphere));
+    ballPhysics2->transform.SetPosition(glm::vec3(0, 1.60f, 0));
+    ballPhysics2->transform.SetScale(glm::vec3(0.25f));
+    GraphicsRender::GetInstance().AddModelAndShader(ballPhysics2, defaultShader);
+
+    ballPhysics2->Initialize(SPHERE, true, STATIC);
 
 
     PhysicsObject* floor = new PhysicsObject();
     floor->name = "Floor Physics";
     floor->LoadModel("Models/Floor/Floor.fbx");
     floor->transform.SetRotation(glm::vec3(90, 0, 0));
-    floor->transform.SetPosition(glm::vec3(0, -2, 0));
+    floor->transform.SetPosition(glm::vec3(0, -3, 0));
+    floor->transform.SetScale(glm::vec3(20, 20, 2.5f));
 
     GraphicsRender::GetInstance().AddModelAndShader(floor, defaultShader);
     floor->Initialize(AABB, true, STATIC);
 
-    //Model* chain
 
-
-    //SoftbodyObject* softBodyTest1 = new SoftbodyObject();
-    //softBodyTest1->name = "SoftbodySphere1";
-    //softBodyTest1->LoadModel("Models/DefaultSphere/DefaultSphere.fbx");
-    //softBodyTest1->transform.SetPosition(glm::vec3(0, 1, 0));
-    //softBodyTest1->transform.SetScale(glm::vec3(0.25f));
-    //GraphicsRender::GetInstance().AddModelAndShader(softBodyTest1, defaultShader);
-
-    //softBodyTest1->AddPhysicsObject(ballPhysics);
-
-    //softBodyTest1->type = BodyType::SPRING;
-    //softBodyTest1->Initialize();
-    //
 
     ChainChomp* chomp = new ChainChomp();
     chomp->AddPhysicsObject(ballPhysics);
+    chomp->AddPhysicsObject(floor);
+    chomp->SetPointIndexSphereRadius(0, 0.5f);
+    chomp->bounceFactor = 0.2f;
+    chomp->groundLevel = -2.0f;
 
 
-    //softBodyTest2->AddSticksForAllPoints();
-    //softBodyTest2->AddLockSphere(glm::vec3(-0.2f, 0.8f, -0.2f), 0.15f);
-   // softBodyTest2->AddSticksInbetween(0, 15);
-   // softBodyTest2->isVisible = false;
+
+    SoftbodyObject* boxSoftBody = new SoftbodyObject();
+    boxSoftBody->LoadModel("Models/DefaultCube/DefaultCube.fbx");
+    boxSoftBody->name = "Box 1";
+     boxSoftBody->transform.SetPosition(glm::vec3(0, 1, 0));
+    boxSoftBody->transform.SetScale(glm::vec3(0.25f));
+    GraphicsRender::GetInstance().AddModelAndShader(boxSoftBody, defaultShader);
+    boxSoftBody->type = BodyType::CLOTH;
 
 
-  //  0.00192526, 0.991442, -0.00474217
+    boxSoftBody->Initialize();
+    boxSoftBody->AddSticksForAllPoints();
+    boxSoftBody->AddPhysicsObject(ballPhysics);
+    boxSoftBody->AddPhysicsObject(floor);
+    boxSoftBody->SetPointsSphereRadius(0.15f);
+    boxSoftBody->tightnessFactor = 0.005f;
+    boxSoftBody->bounceFactor = 0.25f;
+    boxSoftBody->groundLevel = -3.0f;
+    boxSoftBody->showDebug = false;
+
     
+    SoftbodyObject* clothSoftbody = new SoftbodyObject();
+    clothSoftbody->LoadModel("Models/Plane/Plane.ply");
+    clothSoftbody->name = "clothSoftbody 1";
+    clothSoftbody->transform.SetPosition(glm::vec3(0, 2, 0));
+    clothSoftbody->transform.SetScale(glm::vec3(5));
+    GraphicsRender::GetInstance().AddModelAndShader(clothSoftbody, defaultShader);
+    clothSoftbody->type = BodyType::CLOTH;
+    clothSoftbody->Initialize();
+    clothSoftbody->AddPhysicsObject(ballPhysics2);
+    clothSoftbody->isClothOverSphere = true;
+    clothSoftbody->gravity = 0.1f;
+    clothSoftbody->groundLevel = -3.0f;
+    clothSoftbody->showDebug = false;
+    clothSoftbody->AddLockSphere(glm::vec3(0, 2, 0), 0.15f);
+
 
     applicationThread->isThreadActive = true;
     applicationThread->isApplicationPlay = &isPlayMode;

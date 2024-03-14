@@ -59,16 +59,20 @@ public:
 	void AddLockSphere(glm::vec3 centre, float radius);
 	void AddLockIndexSphere(unsigned int Index, float radius);
 	void AddPhysicsObject(PhysicsObject* object);
-
+	void SetPointsSphereRadius(float radius);
+	void SetPointIndexSphereRadius(int Index,float radius);
 	PhysicsObject* updateAABBTest = nullptr;
 
 	 Point* MovePoint(unsigned int Index);
+	 float tightnessFactor = 1;
+	 bool showDebug = true;
+	 float bounceFactor = 0.8f;
+	 float groundLevel = -2.0f;
+	 bool isClothOverSphere = false;
 private:
 
-	bool showDebug = true;
 
 	float renderRadius = 0.025f;
-	float tightnessFactor = 1;
 	float lockRadius;
 	const double MAX_DELTATIME = 1.0 / 60.0;
 
