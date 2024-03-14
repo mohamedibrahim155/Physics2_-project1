@@ -225,6 +225,9 @@
     <ClCompile Include="src\Physics\SoftBody\ChainChomp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Physics\SoftBody\PhysicsBall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h">
@@ -471,6 +474,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics\SoftBody\ChainChomp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics\SoftBody\PhysicsBall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
