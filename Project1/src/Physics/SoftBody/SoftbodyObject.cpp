@@ -366,6 +366,7 @@ void SoftbodyObject::Render()
 
 void SoftbodyObject::OnDestroy()
 {
+
 }
 
 void SoftbodyObject::UpdateVerlet(float deltaTime)
@@ -573,11 +574,30 @@ void SoftbodyObject::AddLockSphere(glm::vec3 centre, float radius)
 
 }
 
+void SoftbodyObject::AddLockIndexSphere(unsigned int Index, float radius)
+{
+
+	lockSphereCenter = listOfPoints[Index]->position;
+	lockRadius = radius;
+
+	LockPointIndex(Index, radius);
+
+}
+
 
 
 void SoftbodyObject::AddPhysicsObject(PhysicsObject* object)
 {
 	listOfPhysicsObject.push_back(object);
+}
+
+Point*  SoftbodyObject::MovePoint(unsigned int Index)
+{
+
+
+	return listOfPoints[Index];
+
+	
 }
 
 void SoftbodyObject::UpdateVertices()
@@ -764,4 +784,27 @@ bool SoftbodyObject::IsPointLocked(Point* point, glm::vec3 centre, float radius)
 {
 	float distance = glm::distance(point->position, centre);
 	return distance < radius;
+}
+
+void SoftbodyObject::LockPointIndex(unsigned int& index, float radius)
+{
+
+	if (index < 0 || index >= listOfPoints.size())
+	{
+
+		return;
+	}
+
+	for (size_t i = 0; i < listOfPoints.size(); ++i) {
+		// Calculate the squared distance between the points
+		float squaredDistance = glm::distance(
+			glm::vec3(listOfPoints[i]->position.x, listOfPoints[i]->position.y, listOfPoints[i]->position.z),
+			glm::vec3(listOfPoints[index]->position.x, listOfPoints[index]->position.y, listOfPoints[index]->position.z)
+		);
+
+
+		if (squaredDistance <= radius * radius) {
+			listOfPoints[i]->locked = true;
+		}
+	}
 }

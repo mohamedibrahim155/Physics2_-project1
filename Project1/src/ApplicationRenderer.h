@@ -28,6 +28,8 @@
 #include "CameraManager.h"
 
 #include "Physics/PhysicsEngine.h"
+
+#include "Physics/SoftBody/ChainChomp.h"
 class ApplicationRenderer
 {
 public:
@@ -68,10 +70,15 @@ public:
 	glm::mat4 skyBoxView;
 	int windowWidth;
 	int  WindowHeight;
+
+
+
 private:
 	GLFWwindow* window;
 	
-	
+	SoftbodyObject* softBodyTest2;
+
+	PhysicsObject* ballPhysics;
 
 	//GraphicsRender render;
 

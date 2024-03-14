@@ -215,14 +215,14 @@ void ApplicationRenderer::Start()
 
 
 
-    PhysicsObject* ballPhysics = new PhysicsObject();
+     ballPhysics = new PhysicsObject();
     ballPhysics->name = "BallPhysics";
     ballPhysics->LoadModel(*(DebugModels::GetInstance().defaultSphere));
     ballPhysics->transform.SetPosition(glm::vec3(0, -1, 0));
     ballPhysics->transform.SetScale(glm::vec3(0.25f));
     GraphicsRender::GetInstance().AddModelAndShader(ballPhysics, defaultShader);
 
-    ballPhysics->Initialize(SPHERE, true, STATIC);
+    ballPhysics->Initialize(SPHERE, true, DYNAMIC);
 
 
     PhysicsObject* floor = new PhysicsObject();
@@ -250,20 +250,11 @@ void ApplicationRenderer::Start()
     //softBodyTest1->Initialize();
     //
 
-    SoftbodyObject* softBodyTest2 = new SoftbodyObject();
-    softBodyTest2->name = "SoftbodySphere1";
-    softBodyTest2->LoadModel("Models/DefaultCube/DefaultCube.fbx");
-    softBodyTest2->transform.SetPosition(glm::vec3(0, 1, 0));
-    softBodyTest2->transform.SetScale(glm::vec3(0.25f));
-    GraphicsRender::GetInstance().AddModelAndShader(softBodyTest2, defaultShader);
+    ChainChomp* chomp = new ChainChomp();
+    chomp->AddPhysicsObject(ballPhysics);
 
-    softBodyTest2->AddPhysicsObject(ballPhysics);
 
-    softBodyTest2->type = BodyType::CLOTH;
-    softBodyTest2->Initialize();
-    
-    softBodyTest2->AddLockSphere(glm::vec3(0.2f, 1.2f, 0.2f), 0.15f);
-    softBodyTest2->AddSticksForAllPoints();
+    //softBodyTest2->AddSticksForAllPoints();
     //softBodyTest2->AddLockSphere(glm::vec3(-0.2f, 0.8f, -0.2f), 0.15f);
    // softBodyTest2->AddSticksInbetween(0, 15);
    // softBodyTest2->isVisible = false;
@@ -354,7 +345,7 @@ void ApplicationRenderer::Render()
         EngineGameLoop();
 
         EnterCriticalSection(&applicationThread->cs);
-        applicationThread->physicsEngine->UpdateSoftBodiesVertices();
+       applicationThread->physicsEngine->UpdateSoftBodiesVertices();
         LeaveCriticalSection(&applicationThread->cs);
 
         EngineGraphicsRender();
@@ -569,7 +560,6 @@ void ApplicationRenderer::KeyCallBack(GLFWwindow* window, int key, int scancode,
 
 
         std::cout << "V pressed" << std::endl;
-
         std::vector<Model*> listOfModels = GraphicsRender::GetInstance().GetModelList();
 
 
@@ -587,18 +577,23 @@ void ApplicationRenderer::KeyCallBack(GLFWwindow* window, int key, int scancode,
 
     }
 
-    if (action == GLFW_PRESS)
+   
+    if (isPlayMode)
     {
-        InputManager::GetInstance().OnKeyPressed(key);
+        if (action == GLFW_PRESS)
+        {
+            InputManager::GetInstance().OnKeyPressed(key);
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            InputManager::GetInstance().OnKeyReleased(key);
+        }
+        else if (action == GLFW_REPEAT)
+        {
+            InputManager::GetInstance().OnkeyHold(key);
+        }
     }
-    else if (action == GLFW_RELEASE)
-    {
-        InputManager::GetInstance().OnKeyReleased(key);
-    }
-    else if (action == GLFW_REPEAT)
-    {
-        InputManager::GetInstance().OnkeyHold(key);
-    }
+    
 
 }
 

@@ -167,7 +167,7 @@ void PhysicsEngine::UpdatePhysics(float deltatime)
                 dotProduct = -dotProduct;
             }
 
-            float bounciness = 0.1f; // adjust this value as needed
+            float bounciness = 5.4f; // adjust this value as needed
             glm::vec3 reflected = glm::reflect(incident, normal);
 
             // Check if the length of the normal vector is not close to zero to prevent NaN

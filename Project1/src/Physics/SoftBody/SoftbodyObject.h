@@ -57,9 +57,12 @@ public:
 
 	void CleanZeros(glm::vec3& value);
 	void AddLockSphere(glm::vec3 centre, float radius);
+	void AddLockIndexSphere(unsigned int Index, float radius);
 	void AddPhysicsObject(PhysicsObject* object);
 
 	PhysicsObject* updateAABBTest = nullptr;
+
+	 Point* MovePoint(unsigned int Index);
 private:
 
 	bool showDebug = true;
@@ -86,5 +89,6 @@ private:
 	void HandleSoftBodyAABBCollision(Point& particle, const cAABB& aabb);
 
 	bool IsPointLocked(Point* point, glm::vec3 centre, float radius);
+	void LockPointIndex(unsigned int& index, float radius);
 };
 
