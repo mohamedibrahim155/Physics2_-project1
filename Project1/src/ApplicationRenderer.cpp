@@ -214,18 +214,7 @@ void ApplicationRenderer::Start()
 
 
 
-
-     ballPhysics = new PhysicsObject();
-    ballPhysics->name = "BallPhysics";
-    ballPhysics->LoadModel(*(DebugModels::GetInstance().defaultSphere));
-    ballPhysics->transform.SetPosition(glm::vec3(0, -1, 0.5f));
-    ballPhysics->transform.SetScale(glm::vec3(0.25f));
-    GraphicsRender::GetInstance().AddModelAndShader(ballPhysics, defaultShader);
-
     PhysicsObject* ballPhysics2 = new PhysicsObject();
-
-        ballPhysics2->Initialize(SPHERE, true, STATIC);
-
     ballPhysics2 = new PhysicsObject();
     ballPhysics2->name = "BallPhysics2";
     ballPhysics2->LoadModel(*(DebugModels::GetInstance().defaultSphere));
@@ -246,10 +235,10 @@ void ApplicationRenderer::Start()
     GraphicsRender::GetInstance().AddModelAndShader(floor, defaultShader);
     floor->Initialize(AABB, true, STATIC);
 
-
+    PhysicsBall* ball = new PhysicsBall();
 
     ChainChomp* chomp = new ChainChomp();
-    chomp->AddPhysicsObject(ballPhysics);
+    chomp->AddPhysicsObject(ball->ballPhysics);
     chomp->AddPhysicsObject(floor);
     chomp->SetPointIndexSphereRadius(0, 0.5f);
     chomp->bounceFactor = 0.2f;
@@ -260,7 +249,7 @@ void ApplicationRenderer::Start()
     SoftbodyObject* boxSoftBody = new SoftbodyObject();
     boxSoftBody->LoadModel("Models/DefaultCube/DefaultCube.fbx");
     boxSoftBody->name = "Box 1";
-     boxSoftBody->transform.SetPosition(glm::vec3(0, 1, 0));
+    boxSoftBody->transform.SetPosition(glm::vec3(0, 1, 0));
     boxSoftBody->transform.SetScale(glm::vec3(0.25f));
     GraphicsRender::GetInstance().AddModelAndShader(boxSoftBody, defaultShader);
     boxSoftBody->type = BodyType::CLOTH;
@@ -268,13 +257,74 @@ void ApplicationRenderer::Start()
 
     boxSoftBody->Initialize();
     boxSoftBody->AddSticksForAllPoints();
-    boxSoftBody->AddPhysicsObject(ballPhysics);
+    boxSoftBody->AddPhysicsObject(ball->ballPhysics);
     boxSoftBody->AddPhysicsObject(floor);
     boxSoftBody->SetPointsSphereRadius(0.15f);
     boxSoftBody->tightnessFactor = 0.005f;
     boxSoftBody->bounceFactor = 0.25f;
     boxSoftBody->groundLevel = -3.0f;
     boxSoftBody->showDebug = false;
+
+    SoftbodyObject* boxSoftBody2 = new SoftbodyObject();
+    boxSoftBody2->LoadModel("Models/DefaultCube/DefaultCube.fbx");
+    boxSoftBody2->name = "Box 2";
+    boxSoftBody2->transform.SetPosition(glm::vec3(-2, 1, 0));
+    boxSoftBody2->transform.SetScale(glm::vec3(0.25f));
+    GraphicsRender::GetInstance().AddModelAndShader(boxSoftBody2, defaultShader);
+    boxSoftBody2->type = BodyType::CLOTH;
+
+
+    boxSoftBody2->Initialize();
+    boxSoftBody2->AddSticksForAllPoints();
+    boxSoftBody2->AddPhysicsObject(ball->ballPhysics);
+    boxSoftBody2->AddPhysicsObject(floor);
+    boxSoftBody2->SetPointsSphereRadius(0.15f);
+    boxSoftBody2->tightnessFactor = 0.005f;
+    boxSoftBody2->bounceFactor = 0.25f;
+    boxSoftBody2->groundLevel = -3.0f;
+    boxSoftBody2->showDebug = false;
+
+    SoftbodyObject* boxSoftBody3 = new SoftbodyObject();
+    boxSoftBody3->LoadModel("Models/DefaultCube/DefaultCube.fbx");
+    boxSoftBody3->name = "Box 3";
+    boxSoftBody3->transform.SetPosition(glm::vec3(-3, 1, 0));
+    boxSoftBody3->transform.SetScale(glm::vec3(0.25f));
+    GraphicsRender::GetInstance().AddModelAndShader(boxSoftBody3, defaultShader);
+    boxSoftBody3->type = BodyType::CLOTH;
+
+
+    boxSoftBody3->Initialize();
+    boxSoftBody3->AddSticksForAllPoints();
+    boxSoftBody3->AddPhysicsObject(ball->ballPhysics);
+    boxSoftBody3->AddPhysicsObject(floor);
+    boxSoftBody3->SetPointsSphereRadius(0.15f);
+    boxSoftBody3->tightnessFactor = 0.005f;
+    boxSoftBody3->bounceFactor = 0.25f;
+    boxSoftBody3->groundLevel = -3.0f;
+    boxSoftBody3->showDebug = false;
+
+    SoftbodyObject* boxSoftBody4 = new SoftbodyObject();
+    boxSoftBody4->LoadModel("Models/DefaultCube/DefaultCube.fbx");
+    boxSoftBody4->name = "Box 3";
+    boxSoftBody4->transform.SetPosition(glm::vec3(-4, 1, 0));
+    boxSoftBody4->transform.SetScale(glm::vec3(0.25f));
+    GraphicsRender::GetInstance().AddModelAndShader(boxSoftBody4, defaultShader);
+    boxSoftBody4->type = BodyType::CLOTH;
+
+
+    boxSoftBody4->Initialize();
+    boxSoftBody4->AddSticksForAllPoints();
+    boxSoftBody4->AddPhysicsObject(ball->ballPhysics);
+    boxSoftBody4->AddPhysicsObject(floor);
+    boxSoftBody4->SetPointsSphereRadius(0.15f);
+    boxSoftBody4->tightnessFactor = 0.005f;
+    boxSoftBody4->bounceFactor = 0.25f;
+    boxSoftBody4->groundLevel = -3.0f;
+    boxSoftBody4->showDebug = false;
+
+   
+
+
 
     
     SoftbodyObject* clothSoftbody = new SoftbodyObject();
@@ -291,6 +341,8 @@ void ApplicationRenderer::Start()
     clothSoftbody->groundLevel = -3.0f;
     clothSoftbody->showDebug = false;
     clothSoftbody->AddLockSphere(glm::vec3(0, 2, 0), 0.15f);
+
+    
 
 
     applicationThread->isThreadActive = true;

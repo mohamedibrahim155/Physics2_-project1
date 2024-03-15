@@ -30,6 +30,9 @@
 #include "Physics/PhysicsEngine.h"
 
 #include "Physics/SoftBody/ChainChomp.h"
+
+#include "Physics/SoftBody/PhysicsBall.h"
+
 class ApplicationRenderer
 {
 public:
@@ -78,7 +81,7 @@ private:
 	
 	SoftbodyObject* softBodyTest2;
 
-	PhysicsObject* ballPhysics;
+	//PhysicsObject* ballPhysics;
 
 	//GraphicsRender render;
 
